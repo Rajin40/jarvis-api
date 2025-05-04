@@ -1,7 +1,11 @@
 from flask import Flask, request, jsonify
 import json
 import os
-from backend.decisson_making_brain_model import FirstLayerDMM
+# Instead of this:
+# from backend.decisson_making_brain_model import FirstLayerDMM
+
+# Use this:
+from .backend.decisson_making_brain_model import FirstLayerDMM
 from backend.RealtimeSearchEngine import RealtimeSearchEngine
 from backend.Chatbot import ChatBot
 
