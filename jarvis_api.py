@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import json
 import os
+import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 # Import modules with error handling
@@ -16,20 +17,90 @@ try:
     SEARCH_AVAILABLE = True
 except ImportError:
     SEARCH_AVAILABLE = False
+    print("Warning: Search engine not available")
 
 try:
     from backend.Chatbot import ChatBot
     CHATBOT_AVAILABLE = True
 except ImportError:
     CHATBOT_AVAILABLE = False
+    print("Warning: Chatbot not available")
+
+try:
+    from backend.British_Brian_Voice import speak
+    SPEECH_AVAILABLE = True
+except ImportError:
+    SPEECH_AVAILABLE = False
+    print("Warning: Speech synthesis not available")
 
 app = Flask(__name__)
 executor = ThreadPoolExecutor()
 
 # Configuration
-CHAT_LOG_PATH = "Data/ChatLog.json"  # Using forward slashes for cross-platform
+CHAT_LOG_PATH = "Data/ChatLog.json"
 USERNAME = "Rajin"
 ASSISTANT_NAME = "JARVIS"
+
+COMMAND_PHRASES = {
+    "action_commands": [
+        "open", "close", "play", "content", "google search",
+        "youtube search", "system", "check", "find", "visit", 
+        "launch", "search", "mute", "volume", "enter", "select",
+        "copy", "paste", "undo", "scroll", "reload", "go back",
+        "go forward", "stop", "maximize", "restore", "switch",
+        "previous", "bookmark", "history", "downloads", "inspect",
+        "clear", "fullscreen", "dark mode", "extensions", "settings",
+        "save", "print", "new tab", "reopen", "show desktop",
+        "virtual desktop", "notification", "action center",
+        "lock screen", "log off", "shutdown", "restart", "sleep",
+        "file explorer", "control panel", "navigate", "zoom",
+        "search for", "start the work", "import gmail", "send mail",
+        "send gmail", "send email", "send the mail", "send the email",
+        "extract emails", "jervis you should do the linkedin post",
+        "store the article", "store this article", "save the article", 
+        "save this article", "kholo", "show me", "minimise", "minimize",
+        "type", "press enter", "select all", "copy this",
+        "paste here", "undo karo", "back karo", "copy last paragraph",
+        "increase volume", "volume badhao", "increase sound", "decrease volume",
+        "volume kam karo", "decrease sound", "full volume", "full volume kr do",
+        "mute this", "mute tab", "unmute", "unmute tab", "open browser settings",
+        "browser settings", "save page as", "save as", "print page", "print",
+        "clear browsing data", "clear history", "open bookmarks", "view bookmarks",
+        "reload page", "refresh it", "go back", "back", "go forward", "forward",
+        "stop loading", "stop", "scroll up", "scroll page up", "scroll down",
+        "scroll page down", "scroll to top", "scroll to bottom", "open new tab",
+        "new tab", "reopen closed tab", "restore closed tab", "navigate forward",
+        "forward jao", "zoom in on the current page", "current page me zoom",
+        "zoom out on the current page", "zoom out", "start clap with music system",
+        "start smart music system","post data science blog in website",
+        "post data science blog", "post data scientist blog",
+        "post data analysis blog in website", "post data analysis blog",
+        "post data analyst blog", "post web development blog in website",
+        "post web development blog", "post website development blog",
+        "post digital marketing blog in website", "post digital marketing blog",
+        "post graphic design blog in website", "post graphic design blog",
+        "post statistical analysis blog in website", "post statistical analysis blog",
+        "post statistical blog", "post market research blog in website",
+        "post market research blog", "post market analysis blog in website",
+        "post market analysis blog", "post market analyst blog","store article for website",
+        "save blog for website","store blog for website", "write", "generate",
+        "its time to post in website about data analysis",
+        "its time to post in website about data science",
+        "its time to post in website about web development",
+        "its time to post in website about graphic design",
+        "its time to post in website about market analysis",
+        "its time to post in website about market research",
+        "its time to post in website about digital marketing",
+        "its time to post in website about statistical analysis"
+    ],
+    "search_phrases": [
+        "who is", "what is", "do you know", "can you find", "i need",
+        "i want", "how to", "what was", "who was", "real time data",
+        "give me real time data", "give me real time information", 
+        "where is", "define", "teach me", "research"
+    ],
+    "exit_commands": ["exit", "quit", "bye"]
+}
 
 def load_chat_history():
     """Load chat history from JSON file"""
@@ -52,21 +123,6 @@ def check_existing_response(query, chat_history):
             if i + 1 < len(chat_history) and chat_history[i + 1].get("role") == "assistant":
                 return chat_history[i + 1].get("content")
     return None
-
-COMMAND_PHRASES = {
-    "action_commands": [
-        "open", "close", "play", "content", "google search",
-        "youtube search", "system", "check", "find", "visit", 
-        "launch", "search", "mute", "volume", "enter", "select",
-        # ... (keep your existing command phrases)
-    ],
-    "search_phrases": [
-        "who is", "what is", "do you know", "can you find", "i need",
-        "i want", "how to", "what was", "who was", "real time data",
-        # ... (keep your existing search phrases)
-    ],
-    "exit_commands": ["exit", "quit", "bye"]
-}
 
 def process_query(query, chat_history):
     """Process user query with fallbacks for missing modules"""
@@ -109,12 +165,59 @@ def process_query(query, chat_history):
                 response = RealtimeSearchEngine(query)
             elif CHATBOT_AVAILABLE:
                 response = ChatBot(query)
+            elif query_lower in COMMAND_PHRASES["exit_commands"]:
+                return {"response": "Goodbye!", "exit": True}
                 
     except Exception as e:
         error_msg = f"Sorry, I encountered an error: {str(e)}"
         return {"error": error_msg}
 
     return {"response": response}
+
+@app.route('/')
+def home():
+    """Root endpoint with API information"""
+    return jsonify({
+        "service": "Jarvis API",
+        "status": "running",
+        "version": "1.0",
+        "endpoints": {
+            "root": {"method": "GET", "description": "API information"},
+            "health": {"method": "GET", "description": "Service health check"},
+            "query": {"method": "POST", "description": "Process user queries"}
+        },
+        "modules": {
+            "decision_making": DMM_AVAILABLE,
+            "search_engine": SEARCH_AVAILABLE,
+            "chatbot": CHATBOT_AVAILABLE,
+            "speech_synthesis": SPEECH_AVAILABLE
+        },
+        "usage_example": {
+            "method": "POST",
+            "url": "/api/query",
+            "headers": {"Content-Type": "application/json"},
+            "body": {"query": "what time is it?"}
+        },
+        "documentation": "https://github.com/Rajin40/jarvis-api"
+    })
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.datetime.utcnow().isoformat(),
+        "dependencies": {
+            "decision_making": DMM_AVAILABLE,
+            "search_engine": SEARCH_AVAILABLE,
+            "chatbot": CHATBOT_AVAILABLE,
+            "speech_synthesis": SPEECH_AVAILABLE
+        },
+        "system": {
+            "python_version": os.sys.version,
+            "platform": os.sys.platform
+        }
+    })
 
 @app.route('/api/query', methods=['POST'])
 def handle_query():
@@ -136,14 +239,25 @@ def handle_query():
     
     return jsonify(result)
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({"status": "healthy", "modules": {
-        "decision_making": DMM_AVAILABLE,
-        "search_engine": SEARCH_AVAILABLE,
-        "chatbot": CHATBOT_AVAILABLE
-    }})
+@app.errorhandler(404)
+def not_found(error):
+    """Handle 404 errors"""
+    return jsonify({
+        "error": "Endpoint not found",
+        "available_endpoints": {
+            "root": {"method": "GET", "path": "/"},
+            "health": {"method": "GET", "path": "/health"},
+            "query": {"method": "POST", "path": "/api/query"}
+        }
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Handle 500 errors"""
+    return jsonify({
+        "error": "Internal server error",
+        "message": str(error)
+    }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
