@@ -1,0 +1,6 @@
+flask
+rich
+requests
+pyttsx3
+speech_recognition
+# Add any other dependencies your project needs
