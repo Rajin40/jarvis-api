@@ -1,1 +1,1 @@
-web: gunicorn jarvis_api:app
+web: gunicorn --worker-tmp-dir /dev/shm jarvis_api:app
