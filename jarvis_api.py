@@ -18,36 +18,47 @@ ASSISTANT_NAME = "JARVIS"
 
 # ... [keep your existing load_chat_history, save_chat_history, check_existing_response functions] ...
 
+# At the top with other imports
+try:
+    from backend.decisson_making_brain_model import FirstLayerDMM
+    DMM_AVAILABLE = True
+except ImportError as e:
+    DMM_AVAILABLE = False
+    print(f"Warning: Decision making module not available - {str(e)}")
+
+# ... [keep other imports and config] ...
+
 def process_query(query, chat_history):
-    """Cloud-friendly version without voice dependencies"""
+    """Process user query with fallback when DMM is not available"""
+    query_lower = query.lower()
+    
+    # First check if this is an exact repeat question
+    existing_response = check_existing_response(query, chat_history)
+    if existing_response:
+        return {"response": existing_response, "from_memory": True}
+
     try:
-        # Your existing processing logic but remove voice-specific parts
-        decisions = FirstLayerDMM(query)
+        # Use DMM if available, otherwise use fallback
+        decisions = FirstLayerDMM(query) if DMM_AVAILABLE else None
         
         if decisions:
             responses = []
             for decision in decisions:
-                base_command = decision.split()[0] if decision else ""
-                
-                if base_command in ["google", "youtube"]:
-                    responses.append(f"I would perform the search: {decision} (Note: Browser actions disabled in cloud mode)")
-                
-                elif decision.startswith("realtime"):
-                    realtime_query = decision[9:] if decision.startswith("realtime") else query
-                    responses.append(RealtimeSearchEngine(realtime_query))
-                    
-                else:
-                    general_query = decision.split(" ", 1)[1] if " " in decision else query
-                    responses.append(ChatBot(general_query))
-            
-            response = ". ".join(responses) if responses else "I'm not sure how to respond to that."
+                # ... [rest of your existing decision processing logic] ...
         else:
-            response = ChatBot(query)
-            
-        return {"response": response}
-        
+            # Fallback processing when DMM is not available
+            if any(phrase in query_lower for phrase in COMMAND_PHRASES["action_commands"]):
+                response = f"I would execute: {query} (Note: Actions disabled in cloud mode)"
+            elif any(phrase in query_lower for phrase in COMMAND_PHRASES["search_phrases"]):
+                response = RealtimeSearchEngine(query)
+            else:
+                response = ChatBot(query)
+                
     except Exception as e:
-        return {"error": str(e)}
+        error_msg = f"Sorry, I encountered an error: {str(e)}"
+        return {"error": error_msg}
+
+    return {"response": response}
 
 @app.route('/api/query', methods=['POST'])
 def handle_query():
