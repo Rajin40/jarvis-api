@@ -20,7 +20,7 @@ except ImportError:
     print("Warning: Search engine not available")
 
 try:
-    from backend.Chatbot import ChatBot
+    from backend.Chat_bot import ChatBot
     CHATBOT_AVAILABLE = True
 except ImportError:
     CHATBOT_AVAILABLE = False
