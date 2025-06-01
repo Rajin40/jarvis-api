@@ -1,0 +1,39 @@
+import requests
+import json
+import sys
+sys.path.append("D:/python/jervis")
+from backend.british_brian_Voice import speak # Import the voice module
+4142
+def get_temperature_openweathermap (city):
+    api_key = "0195b77b50d11ad24eb083904e77d2a3" # Replace with your actual OpenW
+    endpoint = "http://api.openweathermap.org/data/2.5/weather"
+    # send GET request to API endpoint
+
+    response = requests.get(endpoint, params={"q": city, "appid": api_key, "units":"metric"})
+                                              
+    # check if the request was successful
+    if response.status_code == 200:
+        # parse JSON response
+        data = json.loads(response.text)
+        # check if 'main' key is present
+        if 'main' in data:
+            # extract temperature in Celsius
+            temperature_celsius = data[ "main"] ["temp" ]
+            return temperature_celsius
+        else:
+            print("Error: 'main' key not found in API response")
+    else:
+        print(f"Error: Failed to fetch data from API. Status code: {response.status_code}")
+
+    return None
+
+def temp():
+    city = "dhaka"
+
+    #get temperature using OpenWeatherMap API
+    temperature_celsius = get_temperature_openweathermap (city)
+    if temperature_celsius is not None:
+        speak(f" The weather in {city} is {temperature_celsius}°C")
+    else:
+        print ("Temperature data not available.")
+
