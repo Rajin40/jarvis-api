@@ -1,57 +1,21 @@
 import sys
 sys.path.append("D:/python/jervis")
-from Temperature import temp
-from backend.British_Brian_Voice import speak  # Import the voice module
-from Internet_speed_check import *
-from check_online_offline import *
-from clap_with_music import *
-from CLOCK import *
-from find_my_ip import *
-from seo_generator import *
-from open_everything.open_auto import open_multiple_items
-from close_eveything.colse_auto import *
+from backend.Temperature import temp
+from backend.british_brian_Voice import speak  # Import the voice module
+from Chrome_Intregretion.CLOCK import what_is_the_time
+from Chrome_Intregretion.find_my_ip import *
 import pyautogui as gui
 import webbrowser
 from Fiching_email.Google_map_data_scap import scrape_google_maps
-from backend.Voice import listen
 from Fiching_email.email_extractor import extract_emails_from_websites
 from Fiching_email.Create_json_file import *
-from Fiching_email.Email_sender import main
 from Linkedin_file.automation_Linkedin import main_linkedin
 from Linkedin_file.Linkedin_Article_store import analyze_and_store_for_linkedin
 from Website_automation.blog_store import analyze_and_store_content_for_website
 from Website_automation.post_blog_in_website import post_category_blog
-from backend.Chatbot import ChatBot
-from Chrome_Intregretion.function_store import *
+from Generate_code.knowledge_updater import code_gen_mode,list_skills,view_error_log,auto_fix_plugins
+import time
 import json
-from datetime import datetime
-
-# Add this function to handle command logging
-def log_structured_command(action, details, method="voice", user_response="positive"):
-    """
-    Logs a command execution to a JSON file.
-    
-    Args:
-        action (str): The type of action performed (e.g., "open_app", "internet_speed_test")
-        details (dict): Specific details about the action
-        method (str): How the command was initiated ("voice" or "manual")
-        user_response (str): User's response to the action ("positive", "neutral", "negative")
-    """
-    log_entry = {
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "action": action,
-        "details": details,
-        "method": method,
-        "user_response": user_response
-    }
-    
-    # Append to a log file
-    try:
-        with open(r"D:\python\jervis\Data\store_function_behavior\command_logs.json", "a") as f:
-            f.write(json.dumps(log_entry) + "\n")
-    except Exception as e:
-        print(f"Error logging command: {e}")
-
 
 def split_compound_commands(text):
     """Split compound commands into individual commands"""
@@ -74,137 +38,325 @@ def split_compound_commands(text):
     # Clean up each command
     return [cmd.strip() for cmd in result if cmd.strip()]
 
-def Function_cmd(text):
+def Function_cmd(cmd):
     # Split compound commands
-    commands = split_compound_commands(text.lower())
+    commands = split_compound_commands(cmd.lower())
     
-    # Process each command
-    for cmd in commands:
+    # Code Generation
+    if any(trigger in cmd for trigger in [
+        'generate code for', 'create a script for', 'make a python script for',
+        'build a program for', 'develop code for', 'write code for',
+        'generate plugin for', 'create plugin for', 'make plugin for',
+        'code generation for', 'create a python script'
+    ]):
         try:
-            print(f"Processing command: {cmd}")  # Debug logging
+            prompt = cmd
+            for trigger in [
+                'generate code for', 'create a script for', 'make a python script for',
+                'build a program for', 'develop code for', 'write code for',
+                'generate plugin for', 'create plugin for', 'make plugin for',
+                'code generation for', 'create a python script'
+            ]:
+                prompt = prompt.replace(trigger, '')
+            prompt = prompt.strip()
             
-            # Initialize variables for structured logging
-            action = None
-            details = {"raw_command": cmd}
-            user_response = None
-            
-            # Your existing command processing logic with added structured logging
-            if "check internet speed" in cmd or "check speed test" in cmd or "speed test" in cmd:
-                action = "check_internet_speed"
-                log_structured_command(action, details)
-                check_internet_speed()
-
-
-            elif handle_linkedin_post(cmd):
-                action = "linkedin_posting"
-                log_structured_command(action, details)
-                continue
-
-            elif handle_blog_posting(cmd):
-                action = "blog_posting"
-                log_structured_command(action, details)
-                continue
-
-            elif handle_content_storage(cmd):
-                action = "content_storage"
-                log_structured_command(action, details)
-                continue
-
-            elif handle_email_extraction(cmd):
-                action = "email_extraction"
-                log_structured_command(action, details)
-                continue
-
-            elif any(keyword in cmd for keyword in ["generate"]):
-                action = "generate_content"
-                query = cmd.replace("generate", "").strip()
-                details["query"] = query
-                log_structured_command(action, details)
-                ChatBot(Query=query)
-
-            elif "find my ip" in cmd or "ip address" in cmd:
-                action = "find_ip"
-                log_structured_command(action, details)
-                speak("your ip is " + find_ip())
-
-            elif "are you offline" in cmd or "hello there" in cmd:
-                action = "check_internet_status"
-                log_structured_command(action, details)
-                internet_status()
-
-            elif "what is the time" in text or "time" in text or "what time is" in text:
-                action = "check_time"
-                log_structured_command(action, details)
-                what_is_the_time()
-
-            elif "start clap with music system" in text or "start smart music system" in text:
-                action = "start_music_system"
-                log_structured_command(action, details)
-                speak("ok now starting")
-                clap_to_misuc()
-
-            elif text.startswith(("open","kholo","show me")):
-                action = "open_application"
-                text = text.replace("kholo","")
-                text = text.replace("show me","")
-                text = text.strip()
-                details["app_name"] = text
-                log_structured_command(action, details)
-                open_multiple_items(text)
-
-            elif handle_text_editing(cmd):
-                action = "text_editing"
-                log_structured_command(action, details)
-                continue
-
-            elif handle_volume_control(cmd):
-                action = "volume_control"
-                log_structured_command(action, details)
-                continue
-
-            elif handle_browser_system_controls(cmd):
-                action = "browser_control"
-                log_structured_command(action, details)
-                continue
-
-            elif "do the linkedin post" in text or "linkedin post" in text or "post on linkedin" in text or "post in linkedin" in text:
-                action = "linkedin_post"
-                try:
-                    log_structured_command(action, details)
-                    success = main_linkedin()
-                    
-                    if success:
-                        speak("Successfully posted on LinkedIn")
-                        user_response = "positive"
-                    else:
-                        speak("Failed to complete LinkedIn post")
-                        user_response = "negative"
-                    
-                    # Update the log with user response
-                    log_structured_command(action, details, user_response=user_response)
-                    return success
-                        
-                except Exception as e:
-                    speak(f"Error executing LinkedIn post: {str(e)}")
-                    user_response = "error"
-                    log_structured_command(action, details, user_response=user_response)
-                    return False
+            if not prompt:
+                speak("Please specify what code you want to generate")
+                return False
+                
+            speak(f"Generating code for: {prompt}")
+            print(f"\n[⚡ Generating Code For]: {prompt}")
+            code_gen_mode(prompt, execute=True)
+            print("\n[🔍 Running Post-Generation Checks]")
+            list_skills()
+            view_error_log()
+            auto_fix_plugins()
+            speak("Code generation process completed")
+            return True
             
         except Exception as e:
-            speak(f"Sorry, I had trouble with: {cmd}")
-            print(f"Error processing '{cmd}': {e}")
-            # Log the failed command
-            log_structured_command("command_failed", {"raw_command": cmd, "error": str(e)})
+            error_msg = f"Error during code generation: {str(e)}"
+            speak(error_msg)
+            print(error_msg)
+            return False
 
-Function_cmd("what is the time")
+    # LinkedIn Posting
+    elif any(trigger in cmd for trigger in [
+        'do the linkedin post', 'linkedin post', 'post on linkedin',
+        'post in linkedin', 'share on linkedin', 'publish to linkedin',
+        'create linkedin post', 'make linkedin post', 'post to linkedin now'
+    ]):
+        try:
+            speak("Preparing LinkedIn post...")
+            success = main_linkedin()
+            
+            if success:
+                speak("Successfully posted on LinkedIn")
+                print("LinkedIn post completed successfully")
+                return True
+            else:
+                speak("Could not complete the LinkedIn post")
+                print("LinkedIn post failed")
+                return False
+                
+        except Exception as e:
+            error_msg = f"Error while posting to LinkedIn: {str(e)}"
+            speak(error_msg)
+            print(error_msg)
+            return False
 
+    # Blog Posting
+    elif any(trigger in cmd for trigger in [
+        'post data science blog', 'post data scientist blog', 'publish data science article',
+        'post data analysis blog', 'post data analyst blog', 'publish data analysis article',
+        'post web development blog', 'post website development blog', 'publish web dev article',
+        'post digital marketing blog', 'publish marketing article', 'post digital marketing post',
+        'post graphic design blog', 'publish design article', 'post graphics blog',
+        'post statistical analysis blog', 'post statistical blog', 'publish stats article',
+        'post market research blog', 'publish research article', 'post market research post',
+        'post market analysis blog', 'post market analyst blog', 'publish market analysis'
+    ]):
+        params = {'status': 'publish', 'index': 0, 'website': False}
+        
+        if 'as draft' in cmd:
+            params['status'] = 'draft'
+        elif 'as private' in cmd:
+            params['status'] = 'private'
+            
+        params['website'] = 'in website' in cmd
+        
+        # Determine category
+        if any(trigger in cmd for trigger in ['post data science blog', 'post data scientist blog', 'publish data science article']):
+            category = 'data_science'
+        elif any(trigger in cmd for trigger in ['post data analysis blog', 'post data analyst blog', 'publish data analysis article']):
+            category = 'data_analysis'
+        elif any(trigger in cmd for trigger in ['post web development blog', 'post website development blog', 'publish web dev article']):
+            category = 'web_development'
+        elif any(trigger in cmd for trigger in ['post digital marketing blog', 'publish marketing article', 'post digital marketing post']):
+            category = 'digital_marketing'
+        elif any(trigger in cmd for trigger in ['post graphic design blog', 'publish design article', 'post graphics blog']):
+            category = 'graphic_design'
+        elif any(trigger in cmd for trigger in ['post statistical analysis blog', 'post statistical blog', 'publish stats article']):
+            category = 'statistical_analysis'
+        elif any(trigger in cmd for trigger in ['post market research blog', 'publish research article', 'post market research post']):
+            category = 'market_research'
+        elif any(trigger in cmd for trigger in ['post market analysis blog', 'post market analyst blog', 'publish market analysis']):
+            category = 'market_analysis'
+            
+        post_category_blog(category=category, post_index=params['index'], status=params['status'])
+        return True
 
+    # Email Extraction
+    elif any(trigger in cmd for trigger in [
+        'extract emails', 'scrape emails', 'get emails',
+        'extract the mails', 'find email addresses', 'collect emails',
+        'harvest emails', 'save mails', 'save all email',
+        'save emails', 'store emails'
+    ]):
+        params = {'immediate': False, 'limit': None, 'domain': None}
+        
+        if 'now' in cmd or 'immediately' in cmd:
+            params['immediate'] = True
+            
+        if 'first' in cmd:
+            params['limit'] = 1
+        elif 'top' in cmd:
+            try:
+                params['limit'] = int(cmd.split('top')[1].split()[0])
+            except (IndexError, ValueError):
+                params['limit'] = 10
+                
+        domain_keywords = ['from', 'for', 'at']
+        for keyword in domain_keywords:
+            if keyword in cmd:
+                parts = cmd.split(keyword)
+                if len(parts) > 1:
+                    params['domain'] = parts[1].strip().split()[0]
+                    break
+        
+        call_params = {
+            'config_path': r'Data\config_json_for_google_map_data.json',
+            'output_folder': r"D:\python\jervis\Data"
+        }
+        
+        if params['limit']:
+            call_params['limit'] = params['limit']
+        if params['domain']:
+            call_params['domain'] = params['domain']
+        if params['immediate']:
+            call_params['immediate'] = True
+            
+        extract_emails_from_websites(**call_params)
+        return True
 
+    # Content Storage
+    elif any(trigger in cmd for trigger in [
+        'store blog for website', 'save blog for website', 'store article for website',
+        'save content for website', 'archive post for website'
+    ]):
+        params = {'immediate': False, 'review': False}
+        
+        if 'now' in cmd or 'immediately' in cmd:
+            params['immediate'] = True
+        if 'review' in cmd or 'check first' in cmd:
+            params['review'] = True
+            
+        call_params = {
+            'chat_log_path': r"D:\python\jervis\Data\ChatLog.json",
+            'output_dir': r"D:\python\jervis\Data"
+        }
+        
+        if params['review']:
+            call_params['review'] = True
+        if params['immediate']:
+            call_params['immediate'] = True
+            
+        analyze_and_store_content_for_website(**call_params)
+        return True
+        
+    elif any(trigger in cmd for trigger in [
+        'store the article for linkedin', 'save this blog for linkedin',
+        'save the article for linkedin', 'store this article for linkedin',
+        'archive post for linkedin', 'save for linkedin'
+    ]):
+        params = {'immediate': False, 'review': False}
+        
+        if 'now' in cmd or 'immediately' in cmd:
+            params['immediate'] = True
+        if 'review' in cmd or 'check first' in cmd:
+            params['review'] = True
+            
+        call_params = {
+            'chat_log_path': r"D:\python\jervis\Data\ChatLog.json",
+            'output_file_path': r"D:\python\jervis\Data\LinkedInPosts.json"
+        }
+        
+        if params['review']:
+            call_params['review'] = True
+        if params['immediate']:
+            call_params['immediate'] = True
+            
+        analyze_and_store_for_linkedin(**call_params)
+        return True
 
+    # Browser and System Controls
+    elif any(trigger in cmd for trigger in ['visit', 'launch', 'open website']):
+        webbrowser.open(f"https://www.{cmd.split()[-1]}.com")
+        speak(f"Visiting {cmd.split()[-1]}")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['play', 'pause', 'stop']):
+        gui.hotkey("space")
+        speak("Media control executed")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['maximize window', 'maximize this']):
+        gui.hotkey("win", "up")
+        speak("Maximizing window")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['minimise window', 'minimise this', 'minimize it']):
+        gui.hotkey("win", "up")
+        speak("Maximizing window")
+        return True
+        
+    elif 'restore window' in cmd:
+        gui.hotkey("win", "shift", "up")
+        speak("Restoring window")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['switch window', 'next window']):
+        gui.hotkey("alt", "tab")
+        speak("Switching to next window")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['previous window', 'back window']):
+        gui.hotkey("alt", "shift", "tab")
+        speak("Switching to previous window")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['open incognito', 'private window']):
+        gui.hotkey("ctrl", "shift", "n")
+        speak("Opening incognito window")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['bookmark page', 'save page']):
+        gui.hotkey("ctrl", "d")
+        speak("Bookmarking page")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['shutdown', 'turn off computer']):
+        gui.hotkey("win","d")
+        time.sleep(0.4)
+        gui.hotkey("alt", "f4")
+        time.sleep(0.4)
+        gui.press("enter")
+        speak("Shutting down")
+        return True
 
+    # Text Editing
+    elif any(trigger in cmd for trigger in ['write', 'type']):
+        speak("writing boss")
+        gui.write(cmd.replace("write", "").replace("type", "").strip())
+        speak("Text written")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['enter', 'press enter']):
+        gui.press("enter")
+        speak("Enter pressed")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['select all', 'select all this']):
+        speak("done boss")
+        gui.hotkey("ctrl", "a")
+        speak("All content selected")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['copy', 'copy this']):
+        gui.hotkey("ctrl", "c")
+        speak("Content copied")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['paste', 'paste here']):
+        gui.hotkey("ctrl", "v")
+        speak("Content pasted")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['undo', 'undo karo', 'back', 'back karo']):
+        gui.hotkey("ctrl", "z")
+        speak("Action undone")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['cut', 'cut this']):
+        gui.hotkey("ctrl", "x")
+        speak("Content cut")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['redo', 'redo karo', 'forward', 'forward karo']):
+        gui.hotkey("ctrl", "y")
+        speak("Action redone")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['delete', 'delete this']):
+        gui.press("delete")
+        speak("Content deleted")
+        return True
+        
+    elif any(trigger in cmd for trigger in ['backspace', 'remove']):
+        gui.press("backspace")
+        speak("Character removed")
+        return True
 
+    # Time
+    elif "what is the time" in cmd or "time" in cmd or "what time is" in cmd:
+        what_is_the_time()
+        return True
 
+    # IP Address
+    elif "find my ip" in cmd or "ip address" in cmd:
+        speak("your ip is " + find_ip())
+        return True
 
-
-
-
+    # If no command matched
+    else:
+        return False

@@ -1,29 +1,73 @@
 import sys
 sys.path.append("D:/python/jervis")
-from Temperature import temp
-from backend.British_Brian_Voice import speak  # Import the voice module
-from Internet_speed_check import *
-from check_online_offline import *
-from clap_with_music import *
-from CLOCK import *
-from find_my_ip import *
-from seo_generator import *
-from open_everything.open_auto import open_multiple_items
-from close_eveything.colse_auto import *
+from backend.Temperature import temp
+from backend.british_brian_Voice import speak  # Import the voice module
+from Chrome_Intregretion.CLOCK import what_is_the_time
+from Chrome_Intregretion.find_my_ip import *
 import pyautogui as gui
 import webbrowser
 from Fiching_email.Google_map_data_scap import scrape_google_maps
-from backend.Voice import listen
 from Fiching_email.email_extractor import extract_emails_from_websites
 from Fiching_email.Create_json_file import *
-from Fiching_email.Email_sender import main
 from Linkedin_file.automation_Linkedin import main_linkedin
 from Linkedin_file.Linkedin_Article_store import analyze_and_store_for_linkedin
 from Website_automation.blog_store import analyze_and_store_content_for_website
 from Website_automation.post_blog_in_website import post_category_blog
-from backend.Chatbot import ChatBot
+from Generate_code.knowledge_updater import code_gen_mode,list_skills,view_error_log,auto_fix_plugins
+import time
 
 
+def handle_code_generation(cmd):
+    """Function to handle code generation commands"""
+    
+    code_triggers = [
+        'generate code for',
+        'create a script for',
+        'make a python script for',
+        'build a program for',
+        'develop code for',
+        'write code for',
+        'generate plugin for',
+        'create plugin for',
+        'make plugin for',
+        'code generation for',
+        'create a python script'
+    ]
+    
+    if any(trigger in cmd.lower() for trigger in code_triggers):
+        try:
+            # Extract the actual prompt from the command
+            prompt = cmd.lower()
+            for trigger in code_triggers:
+                prompt = prompt.replace(trigger, '')
+            prompt = prompt.strip()
+            
+            if not prompt:
+                speak("Please specify what code you want to generate")
+                return False
+                
+            speak(f"Generating code for: {prompt}")
+            print(f"\n[⚡ Generating Code For]: {prompt}")
+            
+            # Execute code generation and all automated follow-ups
+            code_gen_mode(prompt, execute=True)
+            
+            # Automated follow-up tasks
+            print("\n[🔍 Running Post-Generation Checks]")
+            list_skills()
+            view_error_log()
+            auto_fix_plugins()
+            
+            speak("Code generation process completed")
+            return True
+            
+        except Exception as e:
+            error_msg = f"Error during code generation: {str(e)}"
+            speak(error_msg)
+            print(error_msg)
+            return False
+            
+    return False
 
 
 def handle_linkedin_post(cmd):
@@ -283,77 +327,6 @@ def handle_content_storage(cmd):
     
     return False  # No storage command was found
 
-
-
-def handle_volume_control(cmd):
-    """Advanced function to handle volume control commands"""
-    
-    volume_actions = {
-        'increase': {
-            'triggers': [
-                'increase volume',
-                'volume up',
-                'volume badhao',
-                'increase sound',
-                'louder',
-                'sound badhao'
-            ],
-            'key': 'volumeup',
-            'press_count': 4,
-            'response': "Volume increased."
-        },
-        'decrease': {
-            'triggers': [
-                'decrease volume',
-                'volume down', 
-                'volume kam karo',
-                'decrease sound',
-                'quieter',
-                'sound kam karo'
-            ],
-            'key': 'volumedown',
-            'press_count': 4,
-            'response': "Volume decreased."
-        },
-        'max': {
-            'triggers': [
-                'full volume',
-                'full volume kr do',
-                'maximum volume',
-                'volume full karo',
-                '100% volume'
-            ],
-            'key': 'volumeup',
-            'press_count': 20,
-            'response': "Now your system is at full volume boss"
-        },
-        'mute': {
-            'triggers': [
-                'mute',
-                'mute volume',
-                'sound off',
-                'volume band karo'
-            ],
-            'key': 'volumemute',
-            'press_count': 1,
-            'response': "Volume muted."
-        }
-    }
-
-    # Find matching volume action
-    for action, config in volume_actions.items():
-        if any(trigger in cmd for trigger in config['triggers']):
-            # Press the key the specified number of times
-            for _ in range(config['press_count']):
-                gui.press(config['key'])
-            
-            # Provide feedback
-            if 'speak' in globals():  # Check if speak function exists
-                speak(config['response'])
-            print(config['response'])
-            return True
-            
-    return False
 
 
 def handle_browser_system_controls(cmd):
