@@ -5,4 +5,5 @@ pyttsx3==2.98
 SpeechRecognition==3.10.0
 gunicorn==21.2.0
 cohere==4.47
+groq
 # Add any other dependencies your backend modules need
