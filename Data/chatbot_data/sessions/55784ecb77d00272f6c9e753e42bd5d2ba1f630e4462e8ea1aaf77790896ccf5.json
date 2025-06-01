@@ -1,0 +1,14 @@
+{
+  "history": [
+    {
+      "input": "hi",
+      "response": {
+        "response": "Something went wrong. Please try again.",
+        "type": "chat"
+      },
+      "timestamp": "2025-05-31T03:53:28.205442"
+    }
+  ],
+  "created": "2025-05-31T03:53:26.775620",
+  "updated": "2025-05-31T03:53:28.205442"
+}

@@ -1,0 +1,22 @@
+{
+  "history": [
+    {
+      "input": "hi",
+      "response": {
+        "response": "Something went wrong. Please try again.",
+        "type": "chat"
+      },
+      "timestamp": "2025-05-31T03:44:07.417790"
+    },
+    {
+      "input": "hello",
+      "response": {
+        "response": "Something went wrong. Please try again.",
+        "type": "chat"
+      },
+      "timestamp": "2025-05-31T03:44:37.909497"
+    }
+  ],
+  "created": "2025-05-31T03:44:06.352093",
+  "updated": "2025-05-31T03:44:37.909497"
+}
