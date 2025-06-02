@@ -2,7 +2,6 @@ flask==3.1.0
 flask_cors==4.0.1  # Add this line
 rich==14.0.0
 requests==2.32.3
-pyttsx3==2.98
 SpeechRecognition==3.10.0
 gunicorn==21.2.0
 cohere==4.47
