@@ -6,4 +6,15 @@ SpeechRecognition==3.10.0
 gunicorn==21.2.0
 cohere==4.47
 groq
+requests
+BeautifulSoup
+json
+datetime
+os
+sys
+schedule
+asyncio
+pyautogui
+webbrowser
+time
 # Add any other dependencies your backend modules need
