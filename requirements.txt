@@ -5,16 +5,7 @@ pyttsx3==2.98
 SpeechRecognition==3.10.0
 gunicorn==21.2.0
 cohere==4.47
-groq
-requests
-BeautifulSoup
-json
-datetime
-os
-sys
-schedule
-asyncio
-pyautogui
-webbrowser
-time
-# Add any other dependencies your backend modules need
+groq==0.7.0
+beautifulsoup4==4.12.3
+pyautogui==0.9.54
+schedule==1.2.1
