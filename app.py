@@ -15,7 +15,7 @@ sys.path.append("D:/python/jervis")
 from backend.RealtimeSearchEngine import RealtimeSearchEngine
 from backend.chatbot import ChatBot
 # from backend.talk_chatbot import talkChatBot
-from backend.auto_tasks import run_all_jobs_every_30_seconds
+# from backend.auto_tasks import run_all_jobs_every_30_seconds
 
 # Configuration
 CONFIG = {
