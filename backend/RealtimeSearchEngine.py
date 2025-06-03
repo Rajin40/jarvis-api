@@ -109,9 +109,9 @@ def RealtimeSearchEngine(prompt):
     return final_answer
 
 # Main interaction loop
-if __name__ == "__main__":
-    while True:
-        query = input("Enter your query: ")
-        if query.lower() in ['exit', 'quit']:
-            break
-        print(RealtimeSearchEngine(query))
+# if __name__ == "__main__":
+#     while True:
+#         query = input("Enter your query: ")
+#         if query.lower() in ['exit', 'quit']:
+#             break
+#         print(RealtimeSearchEngine(query))
