@@ -11,11 +11,10 @@ import sys
 
 # Add your custom module path
 sys.path.append("D:/python/jervis")
-#from Chrome_Intregretion.function_intregation import Function_cmd
+from Chrome_Intregretion.function_intregation import Function_cmd
 from backend.RealtimeSearchEngine import RealtimeSearchEngine
 from backend.chatbot import ChatBot
-# from backend.talk_chatbot import talkChatBot
-# from backend.auto_tasks import run_all_jobs_every_30_seconds
+#from backend.auto_tasks import run_all_jobs_every_30_seconds
 
 # Configuration
 CONFIG = {
