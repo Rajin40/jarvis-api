@@ -1,6 +1,6 @@
 import sys
 sys.path.append("D:/python/jervis")
-from backend.confic import *
+from .confic import *
 import requests
 from bs4 import BeautifulSoup
 from groq import Groq
